@@ -1,10 +1,12 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>E-Commerce Store</title>
 </head>
 <body>
-    <h1>🛒 E-Commerce Store</h1>
+    <h1>&#x1F6D2; E-Commerce Store</h1>
 
     <h2>Products</h2>
 
@@ -12,21 +14,26 @@
 
     <script>
         fetch("/api/products")
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(products => {
                 const list = document.getElementById("products");
 
                 products.forEach(product => {
                     const item = document.createElement("li");
-
-                    item.textContent =
-                        `${product.name} - ₹${product.price}`;
-
+                    item.textContent = `${product.name} - \u20B9${product.price}`;
                     list.appendChild(item);
                 });
             })
             .catch(error => {
-                console.error("Error:", error);
+                console.error("Error loading products:", error);
+
+                const list = document.getElementById("products");
+                list.innerHTML = "<li>Unable to load products.</li>";
             });
     </script>
 </body>

@@ -29,7 +29,7 @@ backend:
 frontend:
   image:
     repository: ecommerce-frontend
-    tag: "1.1"
+    tag: "1.3"
     pullPolicy: Never
 
   replicas: 2

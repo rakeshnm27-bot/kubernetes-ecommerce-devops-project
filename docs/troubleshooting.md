@@ -42,7 +42,7 @@ ecommerce-backend:1.3
 
 Frontend:
 
-ecommerce-frontend:1.1
+ecommerce-frontend:1.3
 
 The local application deployments use imagePullPolicy: Never.
 

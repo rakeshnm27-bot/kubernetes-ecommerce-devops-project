@@ -24,7 +24,7 @@ minikube image build -t ecommerce-backend:1.3 ./backend
 
 The frontend image used by the current project is:
 
-ecommerce-frontend:1.1
+ecommerce-frontend:1.3
 Validate Helm
 helm lint helm/ecommerce
 

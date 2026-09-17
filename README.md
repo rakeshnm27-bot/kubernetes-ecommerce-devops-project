@@ -182,7 +182,7 @@ The backend exposes:
 | Setting | Value |
 |---|---|
 | Replicas | 2 |
-| Image | `ecommerce-frontend:1.1` |
+| Image | `ecommerce-frontend:1.3` |
 | Container port | 8080 |
 | Service port | 80 |
 
@@ -784,6 +784,20 @@ PVC status, StorageClass, events, access modes, and mounts were checked when val
 Some backup pods initially showed transient errors, while the corresponding Jobs later completed successfully. Job status was verified directly rather than relying only on individual pod status.
 
 ---
+
+## Project Screenshots
+
+### E-Commerce Application
+
+![E-Commerce Application](docs/images/ecommerce-app.png)
+
+### Grafana Dashboard
+
+![Grafana Dashboard](docs/images/grafana-dashboard.png)
+
+### HPA Scaling
+
+![HPA Scaling](docs/images/hpa-scaling.png)
 
 ## Project Structure
 
