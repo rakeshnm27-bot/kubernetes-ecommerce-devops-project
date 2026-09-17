@@ -1,0 +1,97 @@
+{{- if .Values.backup.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: mysql-backup-cronjob
+  namespace: {{ .Values.namespace }}
+spec:
+  schedule: {{ .Values.backup.schedule | quote }}
+  concurrencyPolicy: Forbid
+
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 2
+
+  jobTemplate:
+    spec:
+      backoffLimit: 3
+      ttlSecondsAfterFinished: 300
+
+      template:
+        metadata:
+          labels:
+            app: mysql-backup-cronjob
+
+        spec:
+          restartPolicy: Never
+
+          containers:
+            - name: mysql-backup
+              image: "{{ .Values.mysql.image.repository }}:{{ .Values.mysql.image.tag }}"
+              imagePullPolicy: {{ .Values.mysql.image.pullPolicy }}
+
+              env:
+                - name: MYSQL_HOST
+                  value: mysql
+
+                - name: MYSQL_DATABASE
+                  value: {{ .Values.mysql.database | quote }}
+
+                - name: MYSQL_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: db-secret
+                      key: DB_USER
+
+                - name: MYSQL_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: db-secret
+                      key: DB_PASSWORD
+
+              command:
+                - /bin/sh
+                - -c
+
+              args:
+                - |
+                  set -eu
+                  umask 077
+
+                  BACKUP_FILE="/backup/ecommerce-$(date +%Y%m%d-%H%M%S).sql"
+                  MYSQL_CNF="/tmp/mysql-backup.cnf"
+
+                  echo "Starting scheduled MySQL backup..."
+
+                  cat > "$MYSQL_CNF" <<MYSQL_EOF
+                  [client]
+                  host=$MYSQL_HOST
+                  user=$MYSQL_USER
+                  password=$MYSQL_PASSWORD
+                  MYSQL_EOF
+
+                  trap 'rm -f "$MYSQL_CNF"' EXIT
+
+                  mysqldump \
+                    --defaults-extra-file="$MYSQL_CNF" \
+                    --no-tablespaces \
+                    --single-transaction \
+                    --routines \
+                    --triggers \
+                    "$MYSQL_DATABASE" \
+                    > "$BACKUP_FILE"
+
+                  test -s "$BACKUP_FILE"
+
+                  echo "Scheduled backup completed successfully."
+                  echo "Backup file:"
+                  ls -lh "$BACKUP_FILE"
+
+              volumeMounts:
+                - name: backup-storage
+                  mountPath: /backup
+
+          volumes:
+            - name: backup-storage
+              persistentVolumeClaim:
+                claimName: {{ .Values.backup.existingClaim }}
+{{- end }}

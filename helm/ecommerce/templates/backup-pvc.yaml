@@ -1,0 +1,14 @@
+{{- if and .Values.backup.enabled (not .Values.backup.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-backup-pvc
+  namespace: {{ .Values.namespace }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.backup.storageSize }}
+  storageClassName: {{ .Values.backup.storageClass }}
+{{- end }}

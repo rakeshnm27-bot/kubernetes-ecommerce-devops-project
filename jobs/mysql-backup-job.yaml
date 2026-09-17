@@ -1,0 +1,81 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mysql-backup-job
+  namespace: ecommerce
+spec:
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 300
+
+  template:
+    metadata:
+      labels:
+        app: mysql-backup
+        job-name: mysql-backup-job
+
+    spec:
+      restartPolicy: Never
+
+      containers:
+        - name: mysql-backup
+          image: mysql:8.0
+          imagePullPolicy: IfNotPresent
+
+          env:
+            - name: MYSQL_HOST
+              value: mysql
+
+            - name: MYSQL_DATABASE
+              value: ecommerce
+
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: DB_USER
+
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: DB_PASSWORD
+
+          command:
+            - /bin/sh
+            - -c
+
+          args:
+            - |
+              set -eu
+
+              BACKUP_FILE="/backup/ecommerce-$(date +%Y%m%d-%H%M%S).sql"
+
+              echo "Starting MySQL backup..."
+
+              mkdir -p /backup
+
+              mysqldump \
+                --no-tablespaces \
+                --single-transaction \
+                --routines \
+                --triggers \
+                -h "$MYSQL_HOST" \
+                -u "$MYSQL_USER" \
+                -p"$MYSQL_PASSWORD" \
+                "$MYSQL_DATABASE" \
+                > "$BACKUP_FILE"
+
+              test -s "$BACKUP_FILE"
+
+              echo "Backup completed successfully."
+              echo "Backup file:"
+              ls -lh "$BACKUP_FILE"
+
+          volumeMounts:
+            - name: backup-storage
+              mountPath: /backup
+
+      volumes:
+        - name: backup-storage
+          persistentVolumeClaim:
+            claimName: mysql-backup-pvc

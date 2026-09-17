@@ -1,0 +1,29 @@
+# Local Kubernetes secrets
+config/db-secret.yaml
+config/*secret*.local.yaml
+*.secret.yaml
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Logs
+*.log
+
+# Local tooling / editor files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.swp

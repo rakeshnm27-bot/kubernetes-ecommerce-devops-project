@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>E-Commerce Store</title>
+</head>
+<body>
+    <h1>🛒 E-Commerce Store</h1>
+
+    <h2>Products</h2>
+
+    <ul id="products"></ul>
+
+    <script>
+        fetch("/api/products")
+            .then(response => response.json())
+            .then(products => {
+                const list = document.getElementById("products");
+
+                products.forEach(product => {
+                    const item = document.createElement("li");
+
+                    item.textContent =
+                        `${product.name} - ₹${product.price}`;
+
+                    list.appendChild(item);
+                });
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+    </script>
+</body>
+</html>
